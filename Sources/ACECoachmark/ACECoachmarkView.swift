@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ACECoachmarkView: View {
+    private let TAG: String = "ACECoachmarkView"
+    
     var model: AceCoachmarkBaseModel
     var showCloseButton: Bool
     var highlightFrame: CGRect
@@ -114,6 +116,7 @@ struct ACECoachmarkView: View {
 
         horizontalPosition = maxX <= screenWidth / 3 ? .left : (maxX >= 2 * screenWidth / 3 ? .right : .center)
         verticalPosition = maxY <= screenHeight / 3 ? .top : (maxY >= 2 * screenHeight / 3 ? .bottom : .center)
+        logDebugInfo()
     }
 
     // Content view for the message and navigation
@@ -140,10 +143,6 @@ struct ACECoachmarkView: View {
                 }
                 .padding(.top, 12)
             }
-            Text("""
-H: \(horizontalPosition.rawValue)
-V: \(verticalPosition.rawValue)
-""")
             if let _message = model.message {
                 Text(_message)
                     .foregroundColor(.black)
@@ -204,5 +203,10 @@ V: \(verticalPosition.rawValue)
         case .center: return 0
         case .right: return -16
         }
+    }
+    
+    private func logDebugInfo() {
+        print("[\(TAG)] Horizontal: \(horizontalPosition.rawValue)")
+        print("[\(TAG)] Vertical: \(verticalPosition.rawValue)")
     }
 }
