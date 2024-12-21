@@ -8,49 +8,26 @@
 import SwiftUI
 
 struct ACECoachmarkView: View {
-    var messages: String
+    var model: AceCoachmarkBaseModel
+    var showCloseButton: Bool
     var highlightFrame: CGRect
     @Binding var currentSpot: Int?
     var totalSpotsCount: Int
-    
-    @State
-    private var currentIndex: Int = 0
-    
-    var onDismiss: () -> Void
-    @State private var horizontalPosition: HorizontalPosition
-    @State private var verticalPosition: VerticalPosition
-    
-    init(messages: String, highlightFrame: CGRect, totalSpotsCount: Int, currentSpot: Binding<Int?>, onDismiss: @escaping () -> Void) {
-        self.messages = messages
+    var onDismiss: (() -> Void)?
+
+    @State private var currentIndex: Int = 0
+    @State private var horizontalPosition: HorizontalPosition = .center
+    @State private var verticalPosition: VerticalPosition = .center
+
+    init(model: AceCoachmarkBaseModel, showCloseButton: Bool, highlightFrame: CGRect, totalSpotsCount: Int, currentSpot: Binding<Int?>, onDismiss: (() -> Void)?) {
+        self.model = model
+        self.showCloseButton = showCloseButton
         self.highlightFrame = highlightFrame
         self._currentSpot = currentSpot
         self.totalSpotsCount = totalSpotsCount
         self.onDismiss = onDismiss
-        // Screen dimensions
-        let screenWidth = UIScreen.main.bounds.width
-        let screenHeight = UIScreen.main.bounds.height
-        
-        let maxX = highlightFrame.midX
-        let maxY = highlightFrame.maxY
-        
-        // Determine horizontal position based on maxX and screen width
-        if maxX <= screenWidth / 3 {
-            horizontalPosition = .left
-        } else if maxX >= 2 * screenWidth / 3 {
-            horizontalPosition = .right
-        } else {
-            horizontalPosition = .center
-        }
-        
-        // Determine vertical position based on maxY and screen height
-        if maxY <= screenHeight / 3 {
-            verticalPosition = .top
-        } else if maxY >= 2 * screenHeight / 3 {
-            verticalPosition = .bottom
-        } else {
-            verticalPosition = .center
-        }
     }
+
     var body: some View {
         ZStack {
             // Dimmed background
@@ -60,186 +37,164 @@ struct ACECoachmarkView: View {
                     Rectangle()
                         .overlay(alignment: .topLeading) {
                             RoundedRectangle(cornerRadius: 0)
-                                .frame(width: highlightFrame.width + 8,
-                                       height: highlightFrame.height + 8)
-                                .offset(x: highlightFrame.minX - 4,
-                                        y: highlightFrame.minY - 4)
+                                .frame(width: highlightFrame.width + 8, height: highlightFrame.height + 8)
+                                .offset(x: highlightFrame.minX - 4, y: highlightFrame.minY - 4)
                                 .blendMode(.destinationOut)
                         }
                 })
                 .onTapGesture {
+                    onDismiss?()
                     currentSpot = totalSpotsCount
                 }
+
             VStack(alignment: arrowPosition, spacing: 0) {
                 if verticalPosition == .top {
                     Image(systemName: "arrowtriangle.up.fill")
                         .foregroundColor(.white)
                         .offset(x: arrowOffset, y: 2)
                     content
-                }
-                if verticalPosition == .center {
+                } else if verticalPosition == .center {
                     Image(systemName: "arrowtriangle.up.fill")
                         .foregroundColor(.white)
                         .offset(x: arrowOffset, y: 2)
                     content
-                }
-                if verticalPosition == .bottom {
+                } else if verticalPosition == .bottom {
                     content
                     Image(systemName: "arrowtriangle.down.fill")
                         .foregroundColor(.white)
                         .offset(x: arrowOffset, y: -2)
-                    
                 }
             }
-            .onChange(of: highlightFrame, perform: { newValue in
-                withAnimation {
-                    updatePosition(for: newValue)
-                }
-            })
             .frame(maxWidth: UIScreen.main.bounds.width / 2)
-            .position(x: xPositionArrow, y: YPosition)
+            .position(x: xPositionArrow, y: yPosition)
+            .onAppear { updatePosition(for: highlightFrame) }
+            .onChange(of: highlightFrame, perform: updatePosition)
         }
-        .frame(maxWidth: UIScreen.main.bounds.width)
     }
-    var YPosition: CGFloat {
+
+    // Dynamic Y position based on highlight frame and vertical position
+    var yPosition: CGFloat {
         switch verticalPosition {
         case .top:
             return highlightFrame.maxY + (highlightFrame.height * 2) + 8
         case .center:
-            return highlightFrame.midY + (highlightFrame.height)
+            return highlightFrame.midY + (highlightFrame.height) + 8
         case .bottom:
-            switch horizontalPosition {
-            case .left:
-                return highlightFrame.minY - (highlightFrame.height * 2)
-            case .center:
-                return highlightFrame.minY - (highlightFrame.height / 2) - 16
-            case .right:
-                return highlightFrame.minY - (highlightFrame.height * 2)
-            }
+            return highlightFrame.minY - (highlightFrame.height / 2) - 16
         }
     }
+
+    // Dynamic X position based on highlight frame and horizontal position
     var xPositionArrow: CGFloat {
         switch horizontalPosition {
         case .left:
-            return highlightFrame.maxX + 16
+            return highlightFrame.maxX// + highlightFrame.width + 16
         case .center:
             return highlightFrame.midX
         case .right:
-            return highlightFrame.minX
+            return highlightFrame.minX// - highlightFrame.width
         }
     }
+
+    // Update position based on current highlight frame dimensions
     private func updatePosition(for rect: CGRect) {
-        // Screen dimensions
         let screenWidth = UIScreen.main.bounds.width
         let screenHeight = UIScreen.main.bounds.height
-        
         let maxX = rect.midX
         let maxY = rect.maxY
-        
-        // Determine horizontal position based on maxX and screen width
-        if maxX <= screenWidth / 3 {
-            horizontalPosition = .left
-        } else if maxX >= 2 * screenWidth / 3 {
-            horizontalPosition = .right
-        } else {
-            horizontalPosition = .center
-        }
-        
-        // Determine vertical position based on maxY and screen height
-        if maxY <= screenHeight / 3 {
-            verticalPosition = .top
-        } else if maxY >= 2 * screenHeight / 3 {
-            verticalPosition = .bottom
-        } else {
-            verticalPosition = .center
-        }
+
+        horizontalPosition = maxX <= screenWidth / 3 ? .left : (maxX >= 2 * screenWidth / 3 ? .right : .center)
+        verticalPosition = maxY <= screenHeight / 3 ? .top : (maxY >= 2 * screenHeight / 3 ? .bottom : .center)
     }
-    
-    
-    //content
+
+    // Content view for the message and navigation
     var content: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .center) {
-                Text("Title")
-                Spacer()
-                Button(action: {
-                    currentSpot = totalSpotsCount
-                }) {
-                    Image(systemName: "xmark")
-                        .frame(width: 16, height: 16, alignment: .center)
-                }
-            }
-            .padding(.top, 12)
-            
-            Text("\(highlightFrame.debugDescription)")
-                .foregroundColor(.black)
-                .background(Color.white)
-                .font(.system(size: 12))
-                .padding(.bottom, messages.count > 1 ? 0 : 12)
-            
-            Text(
-"""
-                Horizontal: \(horizontalPosition.rawValue)
-                Vertical: \(verticalPosition.rawValue)
-"""
-            ).font(.system(size: 12))
-            
-            if totalSpotsCount > 1 {
-                HStack(alignment: .center, spacing: 0, content: {
-                    Text("\((currentSpot ?? 0) + 1)/\(totalSpotsCount)")
-                        .font(.system(size: 12))
+            if model.title != nil || showCloseButton {
+                HStack(alignment: .center) {
+                    if let _title = model.title {
+                        Text(_title)
+                            .font(.system(size: 12, weight: .medium))
+                    }
                     Spacer()
-                    HStack(alignment: .center, spacing: 8, content: {
+                    if showCloseButton {
+                        Button(action: {
+                            onDismiss?()
+                            currentSpot = totalSpotsCount
+                        }) {
+                            Image(systemName: "xmark")
+                                .resizable()
+                                .frame(width: 16, height: 16)
+                        }
+                        .font(.system(.title))
+                    }
+                }
+                .padding(.top, 12)
+            }
+            Text("""
+H: \(horizontalPosition.rawValue)
+V: \(verticalPosition.rawValue)
+""")
+            if let _message = model.message {
+                Text(_message)
+                    .foregroundColor(.black)
+                    .background(Color.white)
+                    .font(.system(.caption))
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, totalSpotsCount > 1 ? 12 : 0)
+            }
+
+            if totalSpotsCount > 1 {
+                HStack {
+                    Text("\((currentSpot ?? 0) + 1)/\(totalSpotsCount)")
+                        .font(.system(.caption))
+                    Spacer()
+                    HStack(spacing: 8) {
                         if (currentSpot ?? 0) > 0 {
                             Button {
-                                guard let currentSpotIndex = self.currentSpot else { return }
-                                currentSpot = currentSpotIndex - 1
+                                guard let index = currentSpot else { return }
+                                currentSpot = index - 1
                             } label: {
                                 Image(systemName: "chevron.left.circle.fill")
                             }
-                            .frame(width: 32, height: 32, alignment: .center)
                             .foregroundColor(.orange)
-                            .disabled((currentSpot ?? 0) <= 0)
-                            .font(.system(size: 32))
+                            .font(.system(.title))
                         }
                         if (currentSpot ?? 0) < (totalSpotsCount - 1) {
                             Button {
-                                guard let currentSpotIndex = self.currentSpot else { return }
-                                currentSpot = currentSpotIndex + 1
+                                guard let index = currentSpot else { return }
+                                currentSpot = index + 1
                             } label: {
                                 Image(systemName: "chevron.forward.circle.fill")
                             }
-                            .frame(width: 32, height: 32, alignment: .center)
                             .foregroundColor(.orange)
-                            .font(.system(size: 32))
+                            .font(.system(.title))
                         }
-                    })
-                })
+                    }
+                }
                 .padding(.bottom, 12)
             }
         }
-        .padding(.horizontal, 12)
+        .padding(12)
         .background(Color.white)
         .cornerRadius(10)
     }
+
+    // Determine alignment based on position
     var arrowPosition: HorizontalAlignment {
         switch horizontalPosition {
-        case .left:
-            return .leading
-        case .center:
-            return .center
-        case .right:
-            return .trailing
+        case .left: return .leading
+        case .center: return .center
+        case .right: return .trailing
         }
     }
+
+    // Arrow offset based on position
     var arrowOffset: CGFloat {
         switch horizontalPosition {
-        case .left:
-            return 8
-        case .center:
-            return 0
-        case .right:
-            return -16
+        case .left: return 16
+        case .center: return 0
+        case .right: return -16
         }
     }
 }

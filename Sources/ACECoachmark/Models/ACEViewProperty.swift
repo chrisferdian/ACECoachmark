@@ -5,9 +5,23 @@
 
 import SwiftUI
 
-struct ACEViewProperty {
+struct ACEViewProperty : Sendable{
     var anchor: Anchor<CGRect>
-    var text: String = ""
+    var text: AceCoachmarkBaseModel
+}
+public protocol AceCoachmarkBaseModel: Sendable {
+    var title: String? { get }
+    var message: String? { get }
+}
+
+public struct AceCoachmarkModel: AceCoachmarkBaseModel {
+    public var title: String?
+    public var message: String?
+    
+    public init(title: String? = nil, message: String? = nil) {
+        self.title = title
+        self.message = message
+    }
 }
 
 struct ACEPreference: PreferenceKey {

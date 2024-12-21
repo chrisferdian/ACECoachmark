@@ -7,14 +7,18 @@ import SwiftUI
 public extension View {
     
     @ViewBuilder
-    func addCoachmark(_ id: Int, text: String) -> some View {
+    func addCoachmark(_ id: Int, model: AceCoachmarkBaseModel) -> some View {
         self
             .anchorPreference(key: ACEPreference.self, value: .bounds) {
-                [id: ACEViewProperty(anchor: $0, text: text)]
+                [id: ACEViewProperty(anchor: $0, text: model)]
             }
     }
     
-    func applyCoachmarkLayer(currentSpot: Binding<Int?>) -> some View {
+    func applyCoachmarkLayer(
+        currentSpot: Binding<Int?>,
+        showCloseButton: Bool = true,
+        onDismiss: (() -> Void)? = nil
+    ) -> some View {
         self.overlayPreferenceValue(ACEPreference.self) { values in
             GeometryReader { proxy in
                 if let preference = values.first(where: { item in
@@ -23,19 +27,19 @@ public extension View {
                     let anchor = proxy[preference.value.anchor]
                     
                     ACECoachmarkView(
-                        messages: preference.value.text,
+                        model: preference.value.text,
+                        showCloseButton: showCloseButton,
                         highlightFrame: anchor,
                         totalSpotsCount: values.count,
-                        currentSpot: currentSpot
-                    ) {
-                        
-                    }
+                        currentSpot: currentSpot,
+                        onDismiss: onDismiss
+                    )
                 }
             }
             .ignoresSafeArea()
             .frame(width: UIScreen.main.bounds.width,
                    height: UIScreen.main.bounds.height)
-            .animation(.easeInOut, value: currentSpot.wrappedValue)
+            .animation(.smooth, value: currentSpot.wrappedValue)
         }
     }
 }
