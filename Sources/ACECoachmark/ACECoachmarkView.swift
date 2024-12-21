@@ -33,15 +33,22 @@ struct ACECoachmarkView: View {
             // Dimmed background
             Color.black.opacity(0.6)
                 .edgesIgnoringSafeArea(.all)
-                .mask({
-                    Rectangle()
-                        .overlay(alignment: .topLeading) {
-                            RoundedRectangle(cornerRadius: 0)
-                                .frame(width: highlightFrame.width + 8, height: highlightFrame.height + 8)
-                                .offset(x: highlightFrame.minX - 4, y: highlightFrame.minY - 4)
-                                .blendMode(.destinationOut)
-                        }
-                })
+                .mask(
+                    ZStack {
+                        Rectangle()
+                            .fill(Color.black)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 0)
+                                    .frame(width: highlightFrame.width + 8, height: highlightFrame.height + 8)
+                                    .position(
+                                        x: highlightFrame.minX + highlightFrame.width / 2,
+                                        y: highlightFrame.minY + highlightFrame.height / 2
+                                    )
+                                    .blendMode(.destinationOut)
+                            )
+                            .compositingGroup() // Required for blend mode
+                    }
+                )
                 .onTapGesture {
                     onDismiss?()
                     currentSpot = totalSpotsCount
@@ -68,7 +75,9 @@ struct ACECoachmarkView: View {
             .frame(maxWidth: UIScreen.main.bounds.width / 2)
             .position(x: xPositionArrow, y: yPosition)
             .onAppear { updatePosition(for: highlightFrame) }
-            .onChange(of: highlightFrame, perform: updatePosition)
+            .onChange(of: highlightFrame, perform: { newValue in
+                updatePosition(for: newValue)
+            })
         }
     }
 
@@ -140,7 +149,6 @@ V: \(verticalPosition.rawValue)
                     .foregroundColor(.black)
                     .background(Color.white)
                     .font(.system(.caption))
-                    .padding(.horizontal, 12)
                     .padding(.bottom, totalSpotsCount > 1 ? 12 : 0)
             }
 
