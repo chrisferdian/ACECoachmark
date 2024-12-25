@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ACECoachmarkView: View {
+struct ACECoachmarkView<Content: View>: View {
     private let TAG: String = "ACECoachmarkView"
     
     var imageArrowLeft: Image = Image(systemName: "chevron.left.circle.fill")
@@ -17,13 +17,17 @@ struct ACECoachmarkView: View {
     var showCloseButton: Bool
     var highlightFrame: CGRect
     var totalSpotsCount: Int
+    var isTapToDismiss: Bool
     var onDismiss: (() -> Void)?
+    var cornerRadius: CGFloat = 0
     
     @Binding var currentSpot: Int?
     @State private var currentIndex: Int = 0
     @State private var horizontalPosition: HorizontalPosition = .none
     @State private var verticalPosition: VerticalPosition = .none
     @State private var yPosition: CGFloat = 0
+    
+    let content: (AceCoachmarkBaseModel, Bool, Binding<Int?>, Int, (() -> Void)?) -> Content
     
     init(
         model: AceCoachmarkBaseModel,
@@ -32,7 +36,10 @@ struct ACECoachmarkView: View {
         totalSpotsCount: Int,
         currentSpot: Binding<Int?>,
         onDismiss: (() -> Void)?,
-        vPosition: VerticalPosition
+        vPosition: VerticalPosition,
+        tapToDismiss: Bool = true,
+        targetViewCornerRadius: CGFloat,
+        @ViewBuilder content: @escaping (AceCoachmarkBaseModel, Bool, Binding<Int?>, Int, (() -> Void)?) -> Content
     ) {
         self.model = model
         self.showCloseButton = showCloseButton
@@ -41,6 +48,9 @@ struct ACECoachmarkView: View {
         self.totalSpotsCount = totalSpotsCount
         self.onDismiss = onDismiss
         self.verticalPosition = vPosition
+        self.isTapToDismiss = tapToDismiss
+        self.cornerRadius = targetViewCornerRadius
+        self.content = content
     }
     
     init(
@@ -53,7 +63,10 @@ struct ACECoachmarkView: View {
         imageRight: Image,
         arrowSize: CGFloat,
         onDismiss: (() -> Void)?,
-        vPosition: VerticalPosition
+        vPosition: VerticalPosition,
+        tapToDismiss: Bool = true,
+        targetViewCornerRadius: CGFloat,
+        @ViewBuilder content: @escaping (AceCoachmarkBaseModel, Bool, Binding<Int?>, Int, (() -> Void)?) -> Content
     ) {
         self.model = model
         self.showCloseButton = showCloseButton
@@ -65,6 +78,9 @@ struct ACECoachmarkView: View {
         self.arrowSize = arrowSize
         self.onDismiss = onDismiss
         self.verticalPosition = vPosition
+        self.isTapToDismiss = tapToDismiss
+        self.cornerRadius = targetViewCornerRadius
+        self.content = content
     }
     
     var body: some View {
@@ -77,7 +93,7 @@ struct ACECoachmarkView: View {
                         Rectangle()
                             .fill(Color.black)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 0)
+                                RoundedRectangle(cornerRadius: cornerRadius)
                                     .frame(width: highlightFrame.width, height: highlightFrame.height)
                                     .position(
                                         x: highlightFrame.minX + highlightFrame.width / 2,
@@ -89,8 +105,10 @@ struct ACECoachmarkView: View {
                     }
                 )
                 .onTapGesture {
-                    onDismiss?()
-                    currentSpot = totalSpotsCount
+                    if isTapToDismiss {
+                        onDismiss?()
+                        currentSpot = totalSpotsCount
+                    }
                 }
             VStack {
                 if highlightFrame.maxY > UIScreen.main.bounds.height * 0.7 {
@@ -99,14 +117,7 @@ struct ACECoachmarkView: View {
                         Spacer()
                             .frame(maxHeight: highlightFrame.minY - 144 - 16 - 12)
                         HStack {
-                            ACECoachmarkContentView(
-                                title: model.title,
-                                message: model.message,
-                                showCloseButton: showCloseButton,
-                                onDismiss: onDismiss,
-                                currentSpot: $currentSpot,
-                                totalSpotsCount: totalSpotsCount
-                            )
+                            content(model, showCloseButton, $currentSpot, totalSpotsCount, onDismiss)
                             .padding(.horizontal, 16)
                         }
                         Image(systemName: "arrowtriangle.down.fill")
@@ -117,14 +128,7 @@ struct ACECoachmarkView: View {
                             .frame(maxHeight: highlightFrame.minY - 144 - 16 - 12)
                         HStack {
                             Spacer()
-                            ACECoachmarkContentView(
-                                title: model.title,
-                                message: model.message,
-                                showCloseButton: showCloseButton,
-                                onDismiss: onDismiss,
-                                currentSpot: $currentSpot,
-                                totalSpotsCount: totalSpotsCount
-                            )
+                            content(model, showCloseButton, $currentSpot, totalSpotsCount, onDismiss)
                             .padding(.horizontal, 16)
                         }
                         HStack {
@@ -137,14 +141,7 @@ struct ACECoachmarkView: View {
                         Spacer()
                             .frame(maxHeight: highlightFrame.minY - 144 - 16 - 12)
                         HStack {
-                            ACECoachmarkContentView(
-                                title: model.title,
-                                message: model.message,
-                                showCloseButton: showCloseButton,
-                                onDismiss: onDismiss,
-                                currentSpot: $currentSpot,
-                                totalSpotsCount: totalSpotsCount
-                            )
+                            content(model, showCloseButton, $currentSpot, totalSpotsCount, onDismiss)
                             .padding(.horizontal, 16)
                             Spacer()
                         }
@@ -164,14 +161,7 @@ struct ACECoachmarkView: View {
                             .offset(x: arrowOffset, y: 3)
                         HStack {
                             Spacer()
-                            ACECoachmarkContentView(
-                                title: model.title,
-                                message: model.message,
-                                showCloseButton: showCloseButton,
-                                onDismiss: onDismiss,
-                                currentSpot: $currentSpot,
-                                totalSpotsCount: totalSpotsCount
-                            )
+                            content(model, showCloseButton, $currentSpot, totalSpotsCount, onDismiss)
                             .padding(.horizontal, 16)
                             Spacer()
                         }
@@ -183,15 +173,8 @@ struct ACECoachmarkView: View {
                             Spacer()
                         }
                         HStack {
-                            ACECoachmarkContentView(
-                                title: model.title,
-                                message: model.message,
-                                showCloseButton: showCloseButton,
-                                onDismiss: onDismiss,
-                                currentSpot: $currentSpot,
-                                totalSpotsCount: totalSpotsCount
-                            )
-                            .padding(.horizontal, 16)
+                            content(model, showCloseButton, $currentSpot, totalSpotsCount, onDismiss)
+                                .padding(.horizontal, 16)
                             Spacer()
                         }
                     } else if horizontalPosition == .right {
@@ -203,14 +186,7 @@ struct ACECoachmarkView: View {
                         }
                         HStack {
                             Spacer()
-                            ACECoachmarkContentView(
-                                title: model.title,
-                                message: model.message,
-                                showCloseButton: showCloseButton,
-                                onDismiss: onDismiss,
-                                currentSpot: $currentSpot,
-                                totalSpotsCount: totalSpotsCount
-                            )
+                            content(model, showCloseButton, $currentSpot, totalSpotsCount, onDismiss)
                             .padding(.horizontal, 16)
                         }
                     }

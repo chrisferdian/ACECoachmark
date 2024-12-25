@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct ACECoachmarkContentView: View {
+public struct ACECoachmarkContentView: View {
     
     var title: String?
     var message: String?
@@ -22,7 +22,18 @@ struct ACECoachmarkContentView: View {
 
     private let arrowSize: CGFloat = 16
 
-    var body: some View {
+    public init(title: String? = nil, message: String? = nil, showCloseButton: Bool, onDismiss: ( () -> Void)?, currentSpot: Binding<Int?> = .constant(nil), totalSpotsCount: Int, imageArrowLeft: Image = Image(systemName: "chevron.left.circle.fill"), imageArrowRight: Image = Image(systemName: "chevron.forward.circle.fill"), imageClose: Image = Image(systemName: "xmark")) {
+        self.title = title
+        self.message = message
+        self.showCloseButton = showCloseButton
+        self.onDismiss = onDismiss
+        self._currentSpot = currentSpot
+        self.totalSpotsCount = totalSpotsCount
+        self.imageArrowLeft = imageArrowLeft
+        self.imageArrowRight = imageArrowRight
+        self.imageClose = imageClose
+    }
+    public var body: some View {
             VStack(alignment: .leading, spacing: 8) {
                 HeaderView()
                 MessageView()
@@ -121,12 +132,12 @@ struct ACECoachmarkContentView: View {
 
 #Preview {
     ACECoachmarkContentView(
-        title: "Lorem",
-        message: "Ipsum",
-        showCloseButton: true,
+        title: "ABC",
+        message: "DEF",
+        showCloseButton: false,
         onDismiss: nil,
         currentSpot: .constant(0),
-        totalSpotsCount: 3
+        totalSpotsCount: 1
     )
     .background(Color.purple)
 }

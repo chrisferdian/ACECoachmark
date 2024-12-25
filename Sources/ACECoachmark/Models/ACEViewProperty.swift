@@ -8,6 +8,7 @@ import SwiftUI
 struct ACEViewProperty : Sendable{
     var anchor: Anchor<CGRect>
     var text: AceCoachmarkBaseModel
+    var corderRadius: CGFloat?
 }
 public protocol AceCoachmarkBaseModel: Sendable {
     var title: String? { get }
