@@ -38,7 +38,6 @@ public extension View {
                         imageRight: imageArrowRight,
                         arrowSize: arrowSize,
                         onDismiss: onDismiss,
-                        vPosition: getVerticalPosition(for: anchor),
                         targetViewCornerRadius: preference.value.corderRadius ?? 0,
                         content: content
                     )
@@ -76,7 +75,6 @@ public extension View {
                         imageRight: imageArrowRight,
                         arrowSize: arrowSize,
                         onDismiss: onDismiss,
-                        vPosition: getVerticalPosition(for: anchor),
                         targetViewCornerRadius: preference.value.corderRadius ?? 0) { model, showClose, current, totalSpot, onDismiss in
                             ACECoachmarkContentView(
                                 title: model.title,

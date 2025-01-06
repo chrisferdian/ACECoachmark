@@ -36,7 +36,6 @@ struct ACECoachmarkView<Content: View>: View {
         totalSpotsCount: Int,
         currentSpot: Binding<Int?>,
         onDismiss: (() -> Void)?,
-        vPosition: VerticalPosition,
         tapToDismiss: Bool = true,
         targetViewCornerRadius: CGFloat,
         @ViewBuilder content: @escaping (AceCoachmarkBaseModel, Bool, Binding<Int?>, Int, (() -> Void)?) -> Content
@@ -47,7 +46,6 @@ struct ACECoachmarkView<Content: View>: View {
         self._currentSpot = currentSpot
         self.totalSpotsCount = totalSpotsCount
         self.onDismiss = onDismiss
-        self.verticalPosition = vPosition
         self.isTapToDismiss = tapToDismiss
         self.cornerRadius = targetViewCornerRadius
         self.content = content
@@ -63,7 +61,6 @@ struct ACECoachmarkView<Content: View>: View {
         imageRight: Image,
         arrowSize: CGFloat,
         onDismiss: (() -> Void)?,
-        vPosition: VerticalPosition,
         tapToDismiss: Bool = true,
         targetViewCornerRadius: CGFloat,
         @ViewBuilder content: @escaping (AceCoachmarkBaseModel, Bool, Binding<Int?>, Int, (() -> Void)?) -> Content
@@ -77,7 +74,6 @@ struct ACECoachmarkView<Content: View>: View {
         self.imageArrowRight = imageRight
         self.arrowSize = arrowSize
         self.onDismiss = onDismiss
-        self.verticalPosition = vPosition
         self.isTapToDismiss = tapToDismiss
         self.cornerRadius = targetViewCornerRadius
         self.content = content
