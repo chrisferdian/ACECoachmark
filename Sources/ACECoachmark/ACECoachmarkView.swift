@@ -1,9 +1,6 @@
 //
 //  ACeCoachmarkView.swift
 //  ACECoachmark
-//
-//  Created by Indo Teknologi Utama on 15/11/24.
-//
 
 import SwiftUI
 
@@ -118,7 +115,7 @@ struct ACECoachmarkView<Content: View>: View {
                         }
                         Image(systemName: "arrowtriangle.down.fill")
                             .foregroundColor(.white)
-                            .offset(x: arrowOffset, y: -2)
+                            .offset(x: arrowOffset, y: -4)
                     } else if horizontalPosition == .right {
                         Spacer()
                             .frame(maxHeight: highlightFrame.minY - 144 - 16 - 12)
@@ -154,7 +151,7 @@ struct ACECoachmarkView<Content: View>: View {
                     if horizontalPosition == .center {
                         Image(systemName: "arrowtriangle.up.fill")
                             .foregroundColor(.white)
-                            .offset(x: arrowOffset, y: 3)
+                            .offset(x: arrowOffset, y: 4)
                         HStack {
                             Spacer()
                             content(model, showCloseButton, $currentSpot, totalSpotsCount, onDismiss)
@@ -208,8 +205,6 @@ struct ACECoachmarkView<Content: View>: View {
         case .none:
             yPosition = .zero
         }
-        print(highlightFrame.maxY)
-        print(yPosition)
     }
     
     // Dynamic X position based on highlight frame and horizontal position

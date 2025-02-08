@@ -6,6 +6,7 @@
 import SwiftUI
 
 struct ACEViewProperty : Sendable{
+    var id: Int
     var anchor: Anchor<CGRect>
     var text: AceCoachmarkBaseModel
     var corderRadius: CGFloat?
@@ -26,9 +27,16 @@ public struct AceCoachmarkModel: AceCoachmarkBaseModel {
 }
 
 struct ACEPreference: PreferenceKey {
-    static let defaultValue: [Int: ACEViewProperty] = [:]
-    
-    static func reduce(value: inout [Int: ACEViewProperty], nextValue: () -> [Int: ACEViewProperty]) {
-        value.merge(nextValue()){$1}
+    static let defaultValue: [ACEViewProperty] = []
+
+    static func reduce(value: inout [ACEViewProperty], nextValue: () -> [ACEViewProperty]) {
+        value.append(contentsOf:nextValue())
+    }
+}
+struct ACEChildPreference: PreferenceKey {
+    static let defaultValue: [ACEViewProperty] = []
+
+    static func reduce(value: inout [ACEViewProperty], nextValue: () -> [ACEViewProperty]) {
+        value.append(contentsOf:nextValue())
     }
 }
