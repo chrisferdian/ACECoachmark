@@ -79,7 +79,7 @@ struct ACECoachmarkView<Content: View>: View {
     var body: some View {
         ZStack(alignment: .top) {
             // Dimmed background
-            Color.black.opacity(0.6)
+            Color.black.opacity(currentSpot == nil ? 0 : 0.6)
                 .edgesIgnoringSafeArea(.all)
                 .mask(
                     ZStack {
