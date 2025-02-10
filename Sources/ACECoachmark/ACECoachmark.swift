@@ -72,7 +72,6 @@ public extension View {
     /// ```
     @ViewBuilder
     func addCoachmark(_ id: Int, model: AceCoachmarkBaseModel, cornerRadius: CGFloat = 0) -> some View {
-        let _ = print(id)
         self
             .anchorPreference(key: ACEPreference.self, value: .bounds) {
                 [ACEViewProperty(id: id, anchor: $0, text: model, corderRadius: cornerRadius)]
@@ -98,7 +97,6 @@ public extension View {
     /// ```
     @ViewBuilder
     func addChildCoachmark(_ id: Int, model: AceCoachmarkBaseModel, cornerRadius: CGFloat = 0) -> some View {
-        let _ = print(id)
         self
             .anchorPreference(key: ACEChildPreference.self, value: .bounds) {
                 [ACEViewProperty(id: id, anchor: $0, text: model, corderRadius: cornerRadius)]
@@ -148,33 +146,34 @@ public extension View {
                 self.overlayPreferenceValue(ACEChildPreference.self) { childValues in
                     let allValues = parentValues + childValues  // Merge both preferences
                     
-                    GeometryReader { proxy in
-                        if let preference = allValues.first(where: { item in
-                            item.id == currentSpot.wrappedValue
-                        }) {
-                            let anchor = proxy[preference.anchor]
-                            ACECoachmarkView(
-                                model: preference.text,
-                                showCloseButton: showCloseButton,
-                                highlightFrame: anchor,
-                                totalSpotsCount: allValues.count,
-                                currentSpot: currentSpot,
-                                imageLeft: imageArrowLeft,
-                                imageRight: imageArrowRight,
-                                arrowSize: arrowSize,
-                                onDismiss: onDismiss,
-                                targetViewCornerRadius: preference.corderRadius ?? 0,
-                                content: content
-                            )
+                    ZStack {
+                        GeometryReader { proxy in
+                            if let preference = allValues.first(where: { item in
+                                item.id == currentSpot.wrappedValue
+                            }) {
+                                let anchor = proxy[preference.anchor]
+                                ACECoachmarkView(
+                                    model: preference.text,
+                                    showCloseButton: showCloseButton,
+                                    highlightFrame: anchor,
+                                    totalSpotsCount: allValues.count,
+                                    currentSpot: currentSpot,
+                                    imageLeft: imageArrowLeft,
+                                    imageRight: imageArrowRight,
+                                    arrowSize: arrowSize,
+                                    onDismiss: onDismiss,
+                                    targetViewCornerRadius: preference.corderRadius ?? 0,
+                                    content: content
+                                )
+                            }
                         }
+                        .ignoresSafeArea()
                     }
-                    .ignoresSafeArea()
-                    .frame(width: UIScreen.main.bounds.width,
-                           height: UIScreen.main.bounds.height)
                     .animation(.smooth, value: currentSpot.wrappedValue)
                 }
             }
     }
+
 
     /// Applies a single coachmark layer to highlight elements in the UI.
     ///
@@ -212,7 +211,6 @@ public extension View {
         @ViewBuilder content: @escaping (AceCoachmarkBaseModel, Bool, Binding<Int?>, Int, (() -> Void)?) -> Content
     ) -> some View {
         self.overlayPreferenceValue(ACEPreference.self) { values in
-            let _ = print(values.map({ $0.id }))
             GeometryReader { proxy in
                 if let preference = values.first(where: { item in
                     item.id == currentSpot.wrappedValue
@@ -274,7 +272,6 @@ public extension View {
         onDismiss: (() -> Void)? = nil
     ) -> some View {
         self.overlayPreferenceValue(ACEPreference.self) { values in
-            let _ = print(values.map({ $0.id }))
             GeometryReader { proxy in
                 if let preference = values.first(where: { item in
                     item.id == currentSpot.wrappedValue
