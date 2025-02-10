@@ -141,37 +141,40 @@ public extension View {
         onDismiss: (() -> Void)? = nil,
         @ViewBuilder content: @escaping (AceCoachmarkBaseModel, Bool, Binding<Int?>, Int, (() -> Void)?) -> Content
     ) -> some View {
-        self
-            .overlayPreferenceValue(ACEPreference.self) { parentValues in
-                self.overlayPreferenceValue(ACEChildPreference.self) { childValues in
-                    let allValues = parentValues + childValues  // Merge both preferences
-                    
-                    ZStack {
-                        GeometryReader { proxy in
-                            if let preference = allValues.first(where: { item in
-                                item.id == currentSpot.wrappedValue
-                            }) {
-                                let anchor = proxy[preference.anchor]
-                                ACECoachmarkView(
-                                    model: preference.text,
-                                    showCloseButton: showCloseButton,
-                                    highlightFrame: anchor,
-                                    totalSpotsCount: allValues.count,
-                                    currentSpot: currentSpot,
-                                    imageLeft: imageArrowLeft,
-                                    imageRight: imageArrowRight,
-                                    arrowSize: arrowSize,
-                                    onDismiss: onDismiss,
-                                    targetViewCornerRadius: preference.corderRadius ?? 0,
-                                    content: content
-                                )
+        Group {
+            if currentSpot.wrappedValue == nil {
+                self // Return the original view without modification
+            } else {
+                self.overlayPreferenceValue(ACEPreference.self) { parentValues in
+                    self.overlayPreferenceValue(ACEChildPreference.self) { childValues in
+                        let allValues = parentValues + childValues  // Merge both preferences
+
+                        ZStack {
+                            if let preference = allValues.first(where: { $0.id == currentSpot.wrappedValue }) {
+                                GeometryReader { proxy in
+                                    let anchor = proxy[preference.anchor]
+                                    ACECoachmarkView(
+                                        model: preference.text,
+                                        showCloseButton: showCloseButton,
+                                        highlightFrame: anchor,
+                                        totalSpotsCount: allValues.count,
+                                        currentSpot: currentSpot,
+                                        imageLeft: imageArrowLeft,
+                                        imageRight: imageArrowRight,
+                                        arrowSize: arrowSize,
+                                        onDismiss: onDismiss,
+                                        targetViewCornerRadius: preference.corderRadius ?? 0,
+                                        content: content
+                                    )
+                                }
+                                .ignoresSafeArea()
                             }
                         }
-                        .ignoresSafeArea()
+                        .animation(.smooth, value: currentSpot.wrappedValue)
                     }
-                    .animation(.smooth, value: currentSpot.wrappedValue)
                 }
             }
+        }
     }
 
 
