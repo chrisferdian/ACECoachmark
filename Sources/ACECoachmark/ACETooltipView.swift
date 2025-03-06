@@ -43,7 +43,7 @@ public struct ACETooltipView<Content: View>: View {
             ZStack(alignment: .center, content: {
                 if position == .top {
                     content(text, position)
-                        .readSize(onChange: { newSize in
+                        .readContentSize(onChange: { newSize in
                             self.tooltipSize = newSize
                         })
                         .padding(.top, highlightFrame.minY - tooltipSize.height)
@@ -63,14 +63,14 @@ public struct ACETooltipView<Content: View>: View {
             ZStack(alignment: .center, content: {
                 if position == .right {
                     content(text, position)
-                        .readSize(onChange: { newSize in
+                        .readContentSize(onChange: { newSize in
                             self.tooltipSize = newSize
                         })
                         .padding(.leading, (highlightFrame.maxX))
                         .padding(.top, highlightFrame.midY - tooltipSize.height / 2)
                 } else if position == .left {
                     content(text, position)
-                        .readSize(onChange: { newSize in
+                        .readContentSize(onChange: { newSize in
                             self.tooltipSize = newSize
                         })
                         .padding(.trailing, (highlightFrame.minX + highlightFrame.width))
@@ -103,19 +103,19 @@ public struct ACETooltipView<Content: View>: View {
     }
 }
 
-private struct SizePreferenceKey: PreferenceKey {
+private struct ContentSizePreferenceKey: PreferenceKey {
     static var defaultValue: CGSize = .zero
     static func reduce(value _: inout CGSize, nextValue _: () -> CGSize) {}
 }
 
 private extension View {
-    internal func readSize(onChange: @escaping (CGSize) -> Void) -> some View {
+    internal func readContentSize(onChange: @escaping (CGSize) -> Void) -> some View {
         background(
             GeometryReader { geometryProxy in
                 Color.clear
-                    .preference(key: SizePreferenceKey.self, value: geometryProxy.size)
+                    .preference(key: ContentSizePreferenceKey.self, value: geometryProxy.size)
             }
         )
-        .onPreferenceChange(SizePreferenceKey.self, perform: onChange)
+        .onPreferenceChange(ContentSizePreferenceKey.self, perform: onChange)
     }
 }
