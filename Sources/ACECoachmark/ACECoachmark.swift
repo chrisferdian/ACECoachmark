@@ -49,9 +49,58 @@
 //  This system ensures seamless integration of coachmarks in SwiftUI-based applications.
 
 import SwiftUI
+public enum TooltipPosition {
+    case top, bottom, left, right
+}
 
+
+struct Triangle: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.closeSubpath()
+        return path
+    }
+}
 @available(iOS 14.0, *)
 public extension View {
+    @ViewBuilder
+    func addTooltip(id: Int, text: String, position: TooltipPosition) -> some View {
+        self
+            .anchorPreference(key: ACETooltipPreference.self, value: .bounds) {
+                [ACETooltipViewProperty(id: id, anchor: $0, text: text, position: position)]
+            }
+    }
+    
+    func applyTooltipLayer<Content: View>(
+        currentId: Binding<Int?>,
+        @ViewBuilder content: @escaping (String, TooltipPosition) -> Content
+    ) -> some View {
+        self.overlayPreferenceValue(ACETooltipPreference.self) { values in
+            GeometryReader { proxy in
+                if let preference = values.first(where: { item in
+                    item.id == currentId.wrappedValue
+                }) {
+                    let anchor = proxy[preference.anchor]
+                    ACETooltipView(
+                        text: preference.text,
+                        highlightFrame: anchor,
+                        tooltipPosition: preference.position,
+                        currentSpot: currentId,
+                        onDismiss: nil,
+                        tapToDismiss: true,
+                        content: content)
+                }
+            }
+            .ignoresSafeArea()
+            .frame(width: UIScreen.main.bounds.width,
+                   height: UIScreen.main.bounds.height)
+            .animation(.smooth, value: currentId.wrappedValue)
+        }
+    }
+    
     
     /// Adds a coachmark to a view using an anchor preference.
     ///

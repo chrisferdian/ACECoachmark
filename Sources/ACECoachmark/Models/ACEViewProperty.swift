@@ -4,7 +4,12 @@
 //
 
 import SwiftUI
-
+struct ACETooltipViewProperty : Sendable{
+    var id: Int
+    var anchor: Anchor<CGRect>
+    var text: String
+    var position: TooltipPosition
+}
 struct ACEViewProperty : Sendable{
     var id: Int
     var anchor: Anchor<CGRect>
@@ -37,6 +42,13 @@ struct ACEChildPreference: PreferenceKey {
     static let defaultValue: [ACEViewProperty] = []
 
     static func reduce(value: inout [ACEViewProperty], nextValue: () -> [ACEViewProperty]) {
+        value.append(contentsOf:nextValue())
+    }
+}
+struct ACETooltipPreference: PreferenceKey {
+    static let defaultValue: [ACETooltipViewProperty] = []
+
+    static func reduce(value: inout [ACETooltipViewProperty], nextValue: () -> [ACETooltipViewProperty]) {
         value.append(contentsOf:nextValue())
     }
 }
