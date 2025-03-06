@@ -103,13 +103,13 @@ public struct ACETooltipView<Content: View>: View {
     }
 }
 
-struct SizePreferenceKey: PreferenceKey {
+private struct SizePreferenceKey: PreferenceKey {
     static var defaultValue: CGSize = .zero
     static func reduce(value _: inout CGSize, nextValue _: () -> CGSize) {}
 }
 
-public extension View {
-    func readSize(onChange: @escaping (CGSize) -> Void) -> some View {
+private extension View {
+    internal func readSize(onChange: @escaping (CGSize) -> Void) -> some View {
         background(
             GeometryReader { geometryProxy in
                 Color.clear
