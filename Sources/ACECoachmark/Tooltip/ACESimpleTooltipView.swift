@@ -4,11 +4,11 @@
 
 import SwiftUI
 
-struct ACESimpleTooltipView: View {
+public struct ACESimpleTooltipView: View {
     let text: String
     let position: TooltipPosition
 
-    var body: some View {
+    public var body: some View {
         Group {
             switch position {
             case .top:

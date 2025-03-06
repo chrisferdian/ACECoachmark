@@ -3,7 +3,7 @@
 //  ACECoachmark
 import SwiftUI
 
-struct ACETooltipView<Content: View>: View {
+public struct ACETooltipView<Content: View>: View {
     private let TAG: String = "ACECoachmarkView"
     
     var arrowSize: CGFloat = 32
@@ -19,7 +19,7 @@ struct ACETooltipView<Content: View>: View {
     
     let content: (String, TooltipPosition) -> Content
     
-    init(
+    public init(
         text: String,
         highlightFrame: CGRect,
         tooltipPosition: TooltipPosition,
@@ -37,7 +37,7 @@ struct ACETooltipView<Content: View>: View {
         self.content = content
     }
     
-    var body: some View {
+    public var body: some View {
         switch position {
         case .top, .bottom:
             ZStack(alignment: .center, content: {
