@@ -8,6 +8,11 @@ public struct ACESimpleTooltipView: View {
     let text: String
     let position: TooltipPosition
 
+    public init(text: String, position: TooltipPosition) {
+        self.text = text
+        self.position = position
+    }
+    
     public var body: some View {
         Group {
             switch position {
