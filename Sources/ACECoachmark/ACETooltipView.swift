@@ -65,7 +65,7 @@ public struct ACETooltipView<Content: View>: View {
                 }
             }
             .frame(maxWidth: UIScreen.main.bounds.width)
-            .background(Color.blue) // Ensure visibility
+            .background(Color.clear) // Ensure visibility
             .cornerRadius(8)
             .shadow(radius: 5)
         case .left, .right:
