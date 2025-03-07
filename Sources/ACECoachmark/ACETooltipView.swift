@@ -3,6 +3,10 @@
 //  ACECoachmark
 import SwiftUI
 
+#Preview(body: {
+    TooltipExampleView()
+})
+
 public struct ACETooltipView<Content: View>: View {
     private let TAG: String = "ACECoachmarkView"
     
@@ -43,13 +47,15 @@ public struct ACETooltipView<Content: View>: View {
     public var body: some View {
         switch position {
         case .top, .bottom:
-            ZStack(alignment: .center, content: {
+            ZStack(alignment: .leading, content: {
                 if position == .top {
                     content(text, position)
                         .readContentSize(onChange: { newSize in
                             self.tooltipSize = newSize
                         })
+                        .frame(maxWidth: 200)
                         .padding(.top, highlightFrame.minY - tooltipSize.height)
+                        .offset(x: highlightFrame.midX - tooltipSize.width)
                 }
             })
             .onTapGesture {
@@ -58,8 +64,8 @@ public struct ACETooltipView<Content: View>: View {
                     currentSpot = nil
                 }
             }
-            .frame(maxWidth: UIScreen.main.bounds.width * 0.7)
-            .background(Color.clear) // Ensure visibility
+            .frame(maxWidth: UIScreen.main.bounds.width)
+            .background(Color.blue) // Ensure visibility
             .cornerRadius(8)
             .shadow(radius: 5)
         case .left, .right:
