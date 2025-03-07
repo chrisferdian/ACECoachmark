@@ -49,7 +49,7 @@
 //  This system ensures seamless integration of coachmarks in SwiftUI-based applications.
 
 import SwiftUI
-public enum TooltipPosition {
+public enum ACETooltipPosition {
     case top, bottom, left, right
 }
 
@@ -67,7 +67,7 @@ struct Triangle: Shape {
 @available(iOS 14.0, *)
 public extension View {
     @ViewBuilder
-    func addTooltip(id: Int, text: String, position: TooltipPosition) -> some View {
+    func addTooltip(id: Int, text: String, position: ACETooltipPosition) -> some View {
         self
             .anchorPreference(key: ACETooltipPreference.self, value: .bounds) {
                 [ACETooltipViewProperty(id: id, anchor: $0, text: text, position: position)]
@@ -76,7 +76,7 @@ public extension View {
     
     func applyTooltipLayer<Content: View>(
         currentId: Binding<Int?>,
-        @ViewBuilder content: @escaping (String, TooltipPosition) -> Content
+        @ViewBuilder content: @escaping (String, ACETooltipPosition) -> Content
     ) -> some View {
         self.overlayPreferenceValue(ACETooltipPreference.self) { values in
             GeometryReader { proxy in

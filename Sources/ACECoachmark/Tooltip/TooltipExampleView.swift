@@ -7,17 +7,17 @@ import SwiftUI
 struct TooltipExampleView: View {
     @State private var currentTooltipId: Int? = 2
     @State private var isTooltipVisible = false
-    @State private var selectedDirection: TooltipPosition = .bottom
+    @State private var selectedDirection: ACETooltipPosition = .bottom
 
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             
             // Dropdown to select tooltip direction
             Picker("Select Tooltip Direction", selection: $selectedDirection) {
-                Text("Top").tag(TooltipPosition.top)
-                Text("Bottom").tag(TooltipPosition.bottom)
-                Text("Left").tag(TooltipPosition.left)
-                Text("Right").tag(TooltipPosition.right)
+                Text("Top").tag(ACETooltipPosition.top)
+                Text("Bottom").tag(ACETooltipPosition.bottom)
+                Text("Left").tag(ACETooltipPosition.left)
+                Text("Right").tag(ACETooltipPosition.right)
             }
             .pickerStyle(SegmentedPickerStyle())
             .padding()

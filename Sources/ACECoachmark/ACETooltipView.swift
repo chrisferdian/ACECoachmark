@@ -11,22 +11,22 @@ public struct ACETooltipView<Content: View>: View {
     var highlightFrame: CGRect
     var isTapToDismiss: Bool
     var onDismiss: (() -> Void)?
-    var position: TooltipPosition
+    var position: ACETooltipPosition
     
     @Binding private var currentSpot: Int?
     @State private var tooltipSize: CGSize = .zero
     private let horizontalPadding: CGFloat = 32
     
-    let content: (String, TooltipPosition) -> Content
+    let content: (String, ACETooltipPosition) -> Content
     
     public init(
         text: String,
         highlightFrame: CGRect,
-        tooltipPosition: TooltipPosition,
+        tooltipPosition: ACETooltipPosition,
         currentSpot: Binding<Int?>,
         onDismiss: (() -> Void)?,
         tapToDismiss: Bool = true,
-        @ViewBuilder content: @escaping (String, TooltipPosition) -> Content
+        @ViewBuilder content: @escaping (String, ACETooltipPosition) -> Content
     ) {
         self.text = text
         self.highlightFrame = highlightFrame

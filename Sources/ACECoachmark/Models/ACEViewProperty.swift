@@ -8,7 +8,7 @@ struct ACETooltipViewProperty : Sendable{
     var id: Int
     var anchor: Anchor<CGRect>
     var text: String
-    var position: TooltipPosition
+    var position: ACETooltipPosition
 }
 struct ACEViewProperty : Sendable{
     var id: Int

@@ -6,9 +6,9 @@ import SwiftUI
 
 public struct ACESimpleTooltipView: View {
     let text: String
-    let position: TooltipPosition
+    let position: ACETooltipPosition
 
-    public init(text: String, position: TooltipPosition) {
+    public init(text: String, position: ACETooltipPosition) {
         self.text = text
         self.position = position
     }
@@ -58,7 +58,7 @@ public struct ACESimpleTooltipView: View {
             .rotationEffect(rotation(for: position))
     }
 
-    private func rotation(for position: TooltipPosition) -> Angle {
+    private func rotation(for position: ACETooltipPosition) -> Angle {
         switch position {
         case .top: return .degrees(180)
         case .bottom: return .degrees(0)
