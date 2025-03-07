@@ -19,6 +19,9 @@ public struct ACETooltipView<Content: View>: View {
     
     let content: (String, ACETooltipPosition) -> Content
     
+    private let screenWidth = UIScreen.main.bounds.width
+    private let screenHeight = UIScreen.main.bounds.height
+    
     public init(
         text: String,
         highlightFrame: CGRect,
@@ -55,7 +58,7 @@ public struct ACETooltipView<Content: View>: View {
                     currentSpot = nil
                 }
             }
-            .frame(maxWidth: UIScreen.main.bounds.width)
+            .frame(maxWidth: UIScreen.main.bounds.width * 0.7)
             .background(Color.clear) // Ensure visibility
             .cornerRadius(8)
             .shadow(radius: 5)
@@ -73,7 +76,7 @@ public struct ACETooltipView<Content: View>: View {
                         .readContentSize(onChange: { newSize in
                             self.tooltipSize = newSize
                         })
-                        .padding(.trailing, (highlightFrame.minX + highlightFrame.width))
+                        .padding(.trailing, (UIScreen.main.bounds.width - highlightFrame.maxX))
                         .padding(.top, highlightFrame.midY - tooltipSize.height / 2)
                 }
             })
@@ -83,7 +86,7 @@ public struct ACETooltipView<Content: View>: View {
                     currentSpot = nil
                 }
             }
-            .frame(maxWidth: UIScreen.main.bounds.width)
+//            .frame(maxWidth: UIScreen.main.bounds.width)
             .background(Color.clear)
             .cornerRadius(8)
             .shadow(radius: 5)
