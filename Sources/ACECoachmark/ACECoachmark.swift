@@ -212,6 +212,7 @@ public extension View {
                                         imageRight: imageArrowRight,
                                         arrowSize: arrowSize,
                                         onDismiss: onDismiss,
+                                        tapToDismiss: isTapToDissmissEnable,
                                         targetViewCornerRadius: preference.corderRadius ?? 0,
                                         content: content
                                     )
@@ -278,6 +279,7 @@ public extension View {
                         imageRight: imageArrowRight,
                         arrowSize: arrowSize,
                         onDismiss: onDismiss,
+                        tapToDismiss: isTapToDissmissEnable,
                         targetViewCornerRadius: preference.corderRadius ?? 0,
                         content: content
                     )
@@ -339,6 +341,7 @@ public extension View {
                         imageRight: imageArrowRight,
                         arrowSize: arrowSize,
                         onDismiss: onDismiss,
+                        tapToDismiss: isTapToDissmissEnable,
                         targetViewCornerRadius: preference.corderRadius ?? 0
                     ) { model, showClose, current, totalSpot, onDismiss in
                         ACECoachmarkContentView(
