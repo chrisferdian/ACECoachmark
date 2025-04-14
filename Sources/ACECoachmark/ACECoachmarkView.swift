@@ -25,6 +25,7 @@ struct ACECoachmarkView<Content: View>: View {
     @State private var yPosition: CGFloat = 0
     
     let content: (AceCoachmarkBaseModel, Bool, Binding<Int?>, Int, (() -> Void)?) -> Content
+    @State private var tooltipSize: CGSize = .zero
     
     init(
         model: AceCoachmarkBaseModel,
@@ -108,9 +109,9 @@ struct ACECoachmarkView<Content: View>: View {
                     // Anchor near the bottom, content goes above
                     if horizontalPosition == .center {
                         Spacer()
-                            .frame(maxHeight: highlightFrame.minY - 144 - 16 - 12)
+                            .frame(maxHeight: highlightFrame.minY - tooltipSize.height - 24)
                         HStack {
-                            content(model, showCloseButton, $currentSpot, totalSpotsCount, onDismiss)
+                            contentWrapper
                             .padding(.horizontal, 16)
                         }
                         Image(systemName: "arrowtriangle.down.fill")
@@ -118,43 +119,43 @@ struct ACECoachmarkView<Content: View>: View {
                             .offset(x: arrowOffset, y: -4)
                     } else if horizontalPosition == .right {
                         Spacer()
-                            .frame(maxHeight: highlightFrame.minY - 144 - 16 - 12)
+                            .frame(maxHeight: highlightFrame.minY - tooltipSize.height - 24)
                         HStack {
                             Spacer()
-                            content(model, showCloseButton, $currentSpot, totalSpotsCount, onDismiss)
+                            contentWrapper
                             .padding(.horizontal, 16)
                         }
                         HStack {
                             Spacer()
                             Image(systemName: "arrowtriangle.down.fill")
                                 .foregroundColor(.white)
-                                .offset(x: -32, y: -2)
+                                .offset(x: -32, y: -4)
                         }
                     } else if horizontalPosition == .left {
                         Spacer()
-                            .frame(maxHeight: highlightFrame.minY - 144 - 16 - 12)
+                            .frame(maxHeight: highlightFrame.minY - tooltipSize.height - 24)
                         HStack {
-                            content(model, showCloseButton, $currentSpot, totalSpotsCount, onDismiss)
+                            contentWrapper
                             .padding(.horizontal, 16)
                             Spacer()
                         }
                         HStack {
                             Image(systemName: "arrowtriangle.down.fill")
                                 .foregroundColor(.white)
-                                .offset(x: 32, y: -2)
+                                .offset(x: 32, y: -4)
                             Spacer()
                         }
                     }
                 } else {
                     // Anchor near the top, content goes below
-                    Spacer().frame(height: highlightFrame.maxY + 16 + 12)
+                    Spacer().frame(height: highlightFrame.maxY)
                     if horizontalPosition == .center {
                         Image(systemName: "arrowtriangle.up.fill")
                             .foregroundColor(.white)
                             .offset(x: arrowOffset, y: 4)
                         HStack {
                             Spacer()
-                            content(model, showCloseButton, $currentSpot, totalSpotsCount, onDismiss)
+                            contentWrapper
                             .padding(.horizontal, 16)
                             Spacer()
                         }
@@ -166,7 +167,7 @@ struct ACECoachmarkView<Content: View>: View {
                             Spacer()
                         }
                         HStack {
-                            content(model, showCloseButton, $currentSpot, totalSpotsCount, onDismiss)
+                            contentWrapper
                                 .padding(.horizontal, 16)
                             Spacer()
                         }
@@ -179,7 +180,7 @@ struct ACECoachmarkView<Content: View>: View {
                         }
                         HStack {
                             Spacer()
-                            content(model, showCloseButton, $currentSpot, totalSpotsCount, onDismiss)
+                            contentWrapper
                             .padding(.horizontal, 16)
                         }
                     }
@@ -188,6 +189,14 @@ struct ACECoachmarkView<Content: View>: View {
             .onAppear { updatePosition(for: highlightFrame) }
             .onChange(of: highlightFrame, perform: updatePosition)
         }
+    }
+    
+    @ViewBuilder
+    var contentWrapper: some View {
+        content(model, showCloseButton, $currentSpot, totalSpotsCount, onDismiss)
+            .readContentSize(onChange: { newSize in
+                self.tooltipSize = newSize
+            })
     }
     
     // Dynamic Y position based on highlight frame and vertical position
@@ -201,7 +210,7 @@ struct ACECoachmarkView<Content: View>: View {
         case .center:
             yPosition = highlightFrame.midY + (highlightFrame.height / 2) + padding
         case .bottom:
-            yPosition = highlightFrame.minY //- highlightFrame.height - additionalOffset
+            yPosition = highlightFrame.minY
         case .none:
             yPosition = .zero
         }
@@ -264,4 +273,180 @@ struct ACECoachmarkView<Content: View>: View {
         print("[\(TAG)] Horizontal: \(horizontalPosition.rawValue)")
         print("[\(TAG)] Vertical: \(verticalPosition.rawValue)")
     }
+}
+
+struct CoachmarkExampleView: View {
+    
+    @State var currentCoachmark: Int?
+    @State var currentTooltip: Int? = 0
+
+    var body: some View {
+//        NavigationView(content: {
+        ScrollView {
+            VStack {
+                Button {
+                    self.currentCoachmark = 0
+                } label: {
+                    Text("Start!!!")
+                }
+                .addCoachmark(
+                    4,
+                    model: AceCoachmarkModel(
+                        title: "Title 3",
+                        message: "Message 3"
+                    )
+                )
+                HStack(alignment: .center, spacing: 0) {
+                    Spacer()
+                    Button {
+                        self.currentTooltip = 0
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 16, height: 16)
+                    }
+                    .background(Color.purple)
+                    .addTooltip(id: 0, text: "Blood sugar tested\nafter not eating for 8-12\n hours. sdjajdjajd sjadsajdjasjd sajdjasjdasjBlood sugar tested\nafter not eating for 8-12\n hours. sdjajdjajd sjadsajdjasjd sajdjasjdasj", position: .top)
+                    Spacer()
+//                    Color.red
+                    Button {
+                        currentTooltip = 1
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 16, height: 16)
+                    }
+                    .addTooltip(
+                        id: 1,
+                        text: "TestingTestingTestingTestingTestingTestingTestingTestingTestingTestingTestingTestingTestingTestingTestingTestingTestingTestingTestingTestingTestingTestingTestingTesting",
+                        position: .top
+                    )
+                    Spacer()
+                }
+                HStack {
+                    Color.red
+                        .frame(height: 125)
+                        .addCoachmark(
+                            3,
+                            model: AceCoachmarkModel(
+                                title: "Title 3",
+                                message: "Message 3"
+                            )
+                        )
+                    Color.purple
+                        .frame(height: 125)
+                        .addCoachmark(
+                            9,
+                            model: AceCoachmarkModel(
+                                title: "Title 3",
+                                message: "Message 3"
+                            )
+                        )
+                    Color.orange
+                        .frame(height: 125)
+                        .addCoachmark(
+                            10,
+                            model: AceCoachmarkModel(
+                                title: "Title 3",
+                                message: "Message 3"
+                            )
+                        )
+                }
+                
+                HStack {
+                    Color.orange
+                        .addCoachmark(
+                            0,
+                            model: AceCoachmarkModel(
+                                title: "Title 2",
+                                message: "Blood sugar tested\nafter not eating for 8-12\n hours. sdjajdjajd sjadsajdjasjd sajdjasjdasjBlood sugar tested\nafter not eating for 8-12\n hours. sdjajdjajd sjadsajdjasjd sajdjasjdasjBlood sugar tested\nafter not eating for 8-12\n hours. sdjajdjajd sjadsajdjasjd sajdjasjdasjBlood sugar tested\nafter not eating for 8-12\n hours. sdjajdjajd sjadsajdjasjd sajdjasjdasjBlood sugar tested\nafter not eating for 8-12\n hours. sdjajdjajd sjadsajdjasjd sajdjasjdasjBlood sugar tested\nafter not eating for 8-12\n hours. sdjajdjajd sjadsajdjasjd sajdjasjdasj"
+                            )
+                        )
+                    Color.blue
+                        .addCoachmark(
+                            1,
+                            model: AceCoachmarkModel(
+                                title: "Title 3",
+                                message: "Message 3"
+                            )
+                        )
+                    Color.orange
+                        .addCoachmark(
+                            2,
+                            model: AceCoachmarkModel(
+                                title: "Title 3",
+                                message: "Message 3"
+                            )
+                        )
+                }
+                .frame(width: .infinity, height: 350)
+                .addChildCoachmark(
+                    8,
+                    model: AceCoachmarkModel(
+                        title: "7",
+                        message: "Parent"
+                    )
+                )
+                
+                HStack {
+                    Color.green
+                        .frame(width: .infinity, height: 100)
+                        .addCoachmark(
+                            5,
+                            model: AceCoachmarkModel(
+                                title: "Title 1",
+                                message: "Message 1"
+                            )
+                        )
+                    Color.black
+                        .frame(width: .infinity, height: 100)
+                        .addCoachmark(
+                            6,
+                            model: AceCoachmarkModel(
+                                title: "Title 1",
+                                message: "Message 1"
+                            )
+                        )
+                    Color.pink
+                        .frame(width: 250, height: 44)
+                        .cornerRadius(8)
+                        .addCoachmark(
+                            7,
+                            model: AceCoachmarkModel(
+                                title: "Title 1",
+                                message: "Message 1"
+                            ),
+                            cornerRadius: 8
+                        )
+                }
+            }
+        }
+//        })
+        .applyTooltipLayer(
+            currentId: $currentTooltip,
+            content: { text, position in
+                ACESimpleTooltipView(text: text, position: position)
+            })
+        .applyCoachmarkLayers(
+            currentSpot: $currentCoachmark,
+            isTapToDissmissEnable: false
+        ) { model, showCloseButton, currentSpot, totalSpot, onDismiss in
+            ACECoachmarkContentView(
+                title: model.title,
+                message: model.message,
+                showCloseButton: showCloseButton,
+                onDismiss: {
+                    
+                },
+                currentSpot: currentSpot,
+                totalSpotsCount: totalSpot
+            )
+        }
+    }
+}
+
+#Preview {
+    CoachmarkExampleView()
 }
