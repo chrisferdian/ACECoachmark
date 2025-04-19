@@ -3,29 +3,24 @@
 //  ACECoachmark
 import SwiftUI
 
-#Preview(body: {
-    TooltipExampleView()
-})
-
 public struct ACETooltipView<Content: View>: View {
     private let TAG: String = "ACECoachmarkView"
-    
-    var arrowSize: CGFloat = 32
+
+    var arrowSize: CGFloat = 16
     var text: String
     var highlightFrame: CGRect
     var isTapToDismiss: Bool
     var onDismiss: (() -> Void)?
     var position: ACETooltipPosition
-    
+
     @Binding private var currentSpot: Int?
     @State private var tooltipSize: CGSize = .zero
-    private let horizontalPadding: CGFloat = 32
-    
+
+    private let horizontalPadding: CGFloat = 16
+    private let verticalPadding: CGFloat = 16
+
     let content: (String, ACETooltipPosition) -> Content
-    
-    private let screenWidth = UIScreen.main.bounds.width
-    private let screenHeight = UIScreen.main.bounds.height
-    
+
     public init(
         text: String,
         highlightFrame: CGRect,
@@ -40,75 +35,162 @@ public struct ACETooltipView<Content: View>: View {
         self._currentSpot = currentSpot
         self.position = tooltipPosition
         self.onDismiss = onDismiss
-        self.isTapToDismiss = true
+        self.isTapToDismiss = tapToDismiss
         self.content = content
     }
-    
+
     public var body: some View {
-        switch position {
-        case .top, .bottom:
-            ZStack(alignment: .leading, content: {
-                if position == .top {
-                    content(text, position)
-                        .readContentSize(onChange: { newSize in
-                            self.tooltipSize = newSize
-                        })
-                        .frame(maxWidth: 200)
-                        .padding(.top, highlightFrame.minY - tooltipSize.height)
-                        .offset(x: highlightFrame.midX - tooltipSize.width)
-                }
-            })
-            .onTapGesture {
-                if isTapToDismiss {
-                    onDismiss?()
-                    currentSpot = nil
-                }
+        GeometryReader { geo in
+            ZStack {
+                // Arrow
+                arrowView
+                    .position(calculateArrowPosition())
+
+                // Tooltip
+                content(text, position)
+                    .readContentSize(onChange: { newSize in
+                        tooltipSize = newSize
+                    })
+                    .padding(8)
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    .shadow(radius: 4)
+                    .frame(
+                        maxWidth: getMaxWidth(for: position, in: geo.size),
+                        maxHeight: getMaxHeight(for: position, in: geo.size)
+                    )
+                    .padding(.vertical, geo.safeAreaInsets.top)
+                    .position(calculatePosition(screenWidth: geo.size.width, screenHeight: geo.size.height))
             }
-            .frame(maxWidth: UIScreen.main.bounds.width)
-            .background(Color.clear) // Ensure visibility
-            .cornerRadius(8)
-            .shadow(radius: 5)
-        case .left, .right:
-            ZStack(alignment: .center, content: {
-                if position == .right {
-                    content(text, position)
-                        .readContentSize(onChange: { newSize in
-                            self.tooltipSize = newSize
-                        })
-                        .padding(.leading, (highlightFrame.maxX))
-                        .padding(.top, highlightFrame.midY - tooltipSize.height / 2)
-                } else if position == .left {
-                    content(text, position)
-                        .readContentSize(onChange: { newSize in
-                            self.tooltipSize = newSize
-                        })
-                        .padding(.trailing, (UIScreen.main.bounds.width - highlightFrame.maxX))
-                        .padding(.top, highlightFrame.midY - tooltipSize.height / 2)
-                }
-            })
-            .onTapGesture {
-                if isTapToDismiss {
-                    onDismiss?()
-                    currentSpot = nil
-                }
-            }
-//            .frame(maxWidth: UIScreen.main.bounds.width)
+            .frame(width: geo.size.width, height: geo.size.height)
             .background(Color.clear)
-            .cornerRadius(8)
-            .shadow(radius: 5)
+            .onTapGesture {
+                if isTapToDismiss {
+                    onDismiss?()
+                    currentSpot = nil
+                }
+            }
         }
     }
-    
-    func makePosition() -> (x: CGFloat, y: CGFloat) {
-        let padding: CGFloat = 8
+
+    private func getMaxWidth(for position: ACETooltipPosition, in containerSize: CGSize) -> CGFloat {
+        switch position {
+        case .left:
+            return max(0, highlightFrame.minX - 8)
+        case .right:
+            return max(0, containerSize.width - highlightFrame.maxX - 8)
+        case .top, .bottom:
+            return containerSize.width - 2 * horizontalPadding
+        }
+    }
+
+    private func getMaxHeight(for position: ACETooltipPosition, in containerSize: CGSize) -> CGFloat {
         switch position {
         case .top:
-            return (highlightFrame.midX, highlightFrame.midY)
+            return max(0, highlightFrame.minY - 8)
         case .bottom:
-            return (highlightFrame.midX, highlightFrame.maxY)
+            return max(0, containerSize.height - highlightFrame.maxY - 8)
         case .left, .right:
-            return (0, highlightFrame.midY)
+            return containerSize.height - 2 * verticalPadding
         }
+    }
+
+    private func calculatePosition(screenWidth: CGFloat, screenHeight: CGFloat) -> CGPoint {
+        let tooltipWidth = tooltipSize.width
+        let tooltipHeight = tooltipSize.height
+
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+
+        switch position {
+        case .top:
+            x = clamp(
+                highlightFrame.midX - tooltipWidth / 2,
+                min: horizontalPadding,
+                max: screenWidth - tooltipWidth - horizontalPadding
+            ) + tooltipWidth / 2
+
+            y = highlightFrame.minY - tooltipHeight / 2 - arrowSize
+            y = max(y, tooltipHeight / 2 + verticalPadding)
+
+        case .bottom:
+            x = clamp(
+                highlightFrame.midX - tooltipWidth / 2,
+                min: horizontalPadding,
+                max: screenWidth - tooltipWidth - horizontalPadding
+            ) + tooltipWidth / 2
+
+            y = highlightFrame.maxY + tooltipHeight / 2 + arrowSize
+            y = min(y, screenHeight - tooltipHeight / 2 - verticalPadding)
+
+        case .left:
+            x = highlightFrame.minX - tooltipWidth / 2 - arrowSize
+            y = clamp(
+                highlightFrame.midY - tooltipHeight / 2,
+                min: verticalPadding,
+                max: screenHeight - tooltipHeight - verticalPadding
+            ) + tooltipHeight / 2
+
+        case .right:
+            x = highlightFrame.maxX + tooltipWidth / 2 + arrowSize
+            y = clamp(
+                highlightFrame.midY - tooltipHeight / 2,
+                min: verticalPadding,
+                max: screenHeight - tooltipHeight - verticalPadding
+            ) + tooltipHeight / 2
+        }
+
+        return CGPoint(x: x, y: y)
+    }
+
+    private func calculateArrowPosition() -> CGPoint {
+        switch position {
+        case .top:
+            return CGPoint(
+                x: highlightFrame.midX,
+                y: highlightFrame.minY - arrowSize / 2
+            )
+        case .bottom:
+            return CGPoint(
+                x: highlightFrame.midX,
+                y: highlightFrame.maxY + arrowSize / 2
+            )
+        case .left:
+            return CGPoint(
+                x: highlightFrame.minX - arrowSize / 2,
+                y: highlightFrame.midY
+            )
+        case .right:
+            return CGPoint(
+                x: highlightFrame.maxX + arrowSize / 2,
+                y: highlightFrame.midY
+            )
+        }
+    }
+
+    private var arrowView: some View {
+        Triangle()
+            .fill(Color.white)
+            .frame(width: arrowSize, height: arrowSize)
+            .rotationEffect(arrowRotation)
+            .shadow(radius: 4)
+    }
+
+    private var arrowRotation: Angle {
+        switch position {
+        case .top:
+            return .degrees(180)
+        case .bottom:
+            return .degrees(0)
+        case .left:
+            return .degrees(90)
+        case .right:
+            return .degrees(-90)
+        }
+    }
+
+    private func clamp(_ value: CGFloat, min: CGFloat, max: CGFloat) -> CGFloat {
+        return Swift.max(min, Swift.min(max, value))
     }
 }
 
@@ -127,4 +209,9 @@ private extension View {
         )
         .onPreferenceChange(ContentSizePreferenceKey.self, perform: onChange)
     }
+}
+
+
+#Preview {
+    CoachmarkExampleView()
 }

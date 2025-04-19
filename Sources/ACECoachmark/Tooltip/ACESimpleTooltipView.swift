@@ -17,23 +17,23 @@ public struct ACESimpleTooltipView: View {
         Group {
             switch position {
             case .top:
-                VStack(spacing: 0) {
+                VStack(alignment: .center, spacing: 0) {
                     textView()
-                    arrowView()
+//                    arrowView()
                 }
             case .bottom:
                 VStack(spacing: 0) {
-                    arrowView()
+//                    arrowView()
                     textView()
                 }
             case .left:
                 HStack(spacing: 0) {
                     textView()
-                    arrowView()
+//                    arrowView()
                 }
             case .right:
                 HStack(spacing: 0) {
-                    arrowView()
+//                    arrowView()
                     textView()
                 }
             }

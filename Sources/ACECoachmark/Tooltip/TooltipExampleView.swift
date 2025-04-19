@@ -3,9 +3,50 @@
 //  ACECoachmark
 
 import SwiftUI
+public struct RadioButton: View {
+    let id: String
+    let title: String
+    let accessoryText: String?
+    let isMarked: Bool
+    let isDisabled: Bool
+    let onSelected: (String) -> Void
+
+    // swiftlint:disable:next function_default_parameter_at_end
+    public init(
+        id: String,
+        title: String = "",
+        accessoryText: String? = nil,
+        isMarked: Bool,
+        isDisabled: Bool = false,
+        onSelected: @escaping (String) -> Void
+    ) {
+        self.id = id
+        self.title = title
+        self.accessoryText = accessoryText
+        self.isMarked = isMarked
+        self.isDisabled = isDisabled
+        self.onSelected = onSelected
+    }
+
+    public var body: some View {
+        Button {
+            onSelected(self.id)
+        } label: {
+            HStack {
+                Image(systemName: "info.circle")
+                Text(title)
+                if let accessoryText = accessoryText {
+                    Spacer()
+                    Text(accessoryText)
+                }
+            }
+        }.disabled(isDisabled)
+    }
+}
+
 
 struct TooltipExampleView: View {
-    @State private var currentTooltipId: Int? = 2
+    @State private var currentTooltipId: Int? = 4
     @State private var isTooltipVisible = false
     @State private var selectedDirection: ACETooltipPosition = .bottom
 
@@ -38,7 +79,53 @@ struct TooltipExampleView: View {
                 text: "Blood sugar tested\nafter not eating for 8-12\n hours. sdjajdjajd sjadsajdjasjd sajdjasjdasj ",
                 position: .right
             )
-            
+            HStack(alignment: .center, spacing: 4) {
+                HStack {
+                    Button {
+                        currentTooltipId = 4
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .resizable()
+                            .frame(width: 16, height: 16)
+                    }
+                    .addTooltip(
+                        id: 4,
+                        text: "Blood sugar tested\nafter not eating for 8-12\n hours. sdjajdjajd sjadsajdjasjd sajdjasjdasjBlood sugar tested\nafter not eating for 8-12\n hours. sdjajdjajd sjadsajdjasjd sajdjasjdasj",
+                        position: .top
+                    )
+                    RadioButton(
+                        id: "1",
+                        title: "testing1",
+                        isMarked: false,
+                        isDisabled: false
+                    ) { selected in
+                        
+                    }
+                }
+
+                HStack {
+                    Button {
+                        currentTooltipId = 5
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .resizable()
+                            .frame(width: 16, height: 16)
+                    }
+                    .addTooltip(
+                        id: 5,
+                        text: "Blood sugar tested\nafter not eating for 8-12\n hours. sdjajdjajd sjadsajdjasjd sajdjasjdasjBlood sugar tested\nafter not eating for 8-12\n hours. sdjajdjajd sjadsajdjasjd sajdjasjdasj",
+                        position: .top
+                    )
+                    RadioButton(
+                        id: "1",
+                        title: "testing1",
+                        isMarked: false,
+                        isDisabled: false
+                    ) { selected in
+                        
+                    }
+                }
+            }
             Spacer()
             
             Button(action: {
@@ -79,7 +166,3 @@ struct TooltipExampleView: View {
         }
     }
 }
-
-#Preview(body: {
-    TooltipExampleView()
-})
