@@ -62,6 +62,9 @@ public struct ACETooltipView<Content: View>: View {
                     .padding(.vertical, geo.safeAreaInsets.top)
                     .position(calculatePosition(screenWidth: geo.size.width, screenHeight: geo.size.height))
             }
+            .onChange(of: highlightFrame, perform: { newValue in
+                currentSpot = nil
+            })
             .frame(width: geo.size.width, height: geo.size.height)
             .background(Color.clear)
             .onTapGesture {
